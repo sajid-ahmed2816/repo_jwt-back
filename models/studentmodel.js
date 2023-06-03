@@ -1,15 +1,11 @@
 const mongoose = require("mongoose");
 
-const testSchema = new mongoose.Schema({
+const studentSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: true
     },
     lastName: {
-        type: String,
-        required: true
-    },
-    userName: {
         type: String,
         required: true
     },
@@ -27,5 +23,5 @@ const testSchema = new mongoose.Schema({
     }
 });
 
-const testModel = mongoose.model("Test", testSchema);
-module.exports = testModel;
+const studentModel = mongoose.model("Student", studentSchema);
+module.exports = studentModel;
