@@ -4,17 +4,38 @@ const courseModel = require("../models/coursemodel");
 
 route.get("/", async (req, res) => {
     try {
-        const result = await courseModel.find();
-        if (!result) {
-            res.send({ status: false, data: null, message: "No data found" }).status(400);
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const totalRecords = await courseModel.countDocuments();
+        const totalPages = Math.ceil(totalRecords / limit);
+
+        let result = [];
+        if (startIndex < totalRecords) {
+            result = await courseModel.find().skip(startIndex).limit(limit);
         }
-        else {
-            res.send({ status: true, data: result }).status(200);
-        }
+
+        res.status(200).send({
+            status: true,
+            data: result,
+            totalRecords: totalRecords,
+            totalPages: totalPages,
+        });
+    } catch (e) {
+        res.status(400).send({ status: false });
     }
-    catch (e) {
-        res.send({ status: false, }).status(400);
-    };
+});
+
+route.get("/count", async (req, res) => {
+    try {
+        const count = await courseModel.countDocuments();
+        res.send({ count }).status(200);
+    } catch (error) {
+        res.send({ status: false }).status(400);
+    }
 });
 
 route.get("/:id", async (req, res) => {
@@ -35,7 +56,7 @@ route.get("/:id", async (req, res) => {
 
 route.get("/search", async (req, res) => {
     try {
-        let { courseName } = req.body;
+        let { courseName } = req.query;
         if (courseName) {
             let result = await courseModel.find({ courseName });
             if (!result) {
